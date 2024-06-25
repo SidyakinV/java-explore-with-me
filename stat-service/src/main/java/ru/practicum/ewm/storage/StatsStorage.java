@@ -37,7 +37,8 @@ public class StatsStorage {
             ") \n" +
             "SELECT app, uri, COUNT(*) AS hits \n" +
             "FROM q \n" +
-            "GROUP BY app, uri ");
+            "GROUP BY app, uri \n" +
+            "ORDER BY hits DESC");
 
         return namedParameterJdbcTemplate.query(
                 sqlCmd.toString(), parameters, this::mapRowToViewStats);
