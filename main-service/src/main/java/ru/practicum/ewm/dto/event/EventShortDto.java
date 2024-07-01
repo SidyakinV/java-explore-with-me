@@ -7,6 +7,8 @@ import ru.practicum.ewm.dto.user.UserShortDto;
 @Data
 public class EventShortDto {
 
+    private String annotation;
+
     private CategoryDto category;
 
     private Long confirmedRequests;

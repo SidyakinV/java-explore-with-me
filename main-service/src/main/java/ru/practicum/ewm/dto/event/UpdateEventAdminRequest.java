@@ -1,4 +1,4 @@
-package ru.practicum.ewm.dto.request;
+package ru.practicum.ewm.dto.event;
 
 import lombok.Data;
 import ru.practicum.ewm.dto.location.Location;
@@ -6,7 +6,7 @@ import ru.practicum.ewm.dto.location.Location;
 import javax.validation.constraints.Size;
 
 @Data
-public class UpdateEventUserRequest {
+public class UpdateEventAdminRequest {
 
     @Size(min = 20, max = 2000)
     private String annotation;
@@ -16,7 +16,7 @@ public class UpdateEventUserRequest {
     @Size(min = 20, max = 7000)
     private String description;
 
-    private String eventDate; // Используем тип String, как указано в спецификации
+    private String eventDate; // Тип String как в спецификации
 
     private Location location;
 
