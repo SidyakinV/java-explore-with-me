@@ -30,7 +30,7 @@ public class EventPrivateController {
             @RequestParam(defaultValue = "10") Integer size
     ) {
         log.info("GET-request '/users/{}/events' with parameters: from {}, size{}", userId, from, size);
-        return eventService.getAllEvents(userId, PageCalc.getPageable(from, size));
+        return eventService.getUserEvents(userId, PageCalc.getPageable(from, size));
     }
 
     @PostMapping
@@ -58,7 +58,7 @@ public class EventPrivateController {
     public EventFullDto updateEvent(
             @PathVariable Long userId,
             @PathVariable Long eventId,
-            @RequestBody @Valid UpdateEventAdminRequest dto
+            @RequestBody @Valid UpdateEventUserRequest dto
     ) {
         log.info("PATCH-request '/users/{}/events/{}'", userId, eventId);
         return eventService.updateEvent(userId, eventId, dto);

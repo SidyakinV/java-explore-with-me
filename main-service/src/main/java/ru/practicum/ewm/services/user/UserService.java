@@ -1,4 +1,4 @@
-package ru.practicum.ewm.services;
+package ru.practicum.ewm.services.user;
 
 import ru.practicum.ewm.dto.user.UserDto;
 

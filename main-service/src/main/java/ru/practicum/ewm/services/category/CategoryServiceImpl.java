@@ -1,13 +1,17 @@
-package ru.practicum.ewm.services;
+package ru.practicum.ewm.services.category;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.dto.category.CategoryDto;
 import ru.practicum.ewm.dto.category.CategoryMapper;
 import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.repositories.CategoryRepository;
 import ru.practicum.ewm.exceptions.NotFoundException;
+import ru.practicum.ewm.services.category.CategoryService;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +46,16 @@ public class CategoryServiceImpl implements CategoryService {
         }
         categoryRepository.deleteById(catId);
         log.info("Категория с id={} удалена", catId);
+    }
+
+    @Override
+    public List<CategoryDto> getAllCategories(Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public CategoryDto getCategoryById(Long catId) {
+        return null;
     }
 
 }
