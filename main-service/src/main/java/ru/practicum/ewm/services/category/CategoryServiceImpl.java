@@ -9,7 +9,6 @@ import ru.practicum.ewm.dto.category.CategoryMapper;
 import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.repositories.CategoryRepository;
 import ru.practicum.ewm.exceptions.NotFoundException;
-import ru.practicum.ewm.services.category.CategoryService;
 
 import java.util.List;
 

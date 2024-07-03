@@ -5,7 +5,6 @@ import ru.practicum.ewm.dto.compilation.CompilationDto;
 import ru.practicum.ewm.dto.compilation.NewCompilationDto;
 import ru.practicum.ewm.dto.compilation.UpdateCompilationRequest;
 
-import javax.validation.Valid;
 import java.util.List;
 
 public interface CompilationService {
