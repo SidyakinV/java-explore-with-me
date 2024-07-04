@@ -7,10 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.services.event.EventService;
+import ru.practicum.ewm.utility.DateTimeFormat;
 import ru.practicum.ewm.utility.PageCalc;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -41,8 +40,8 @@ public class EventPublicController {
                 onlyAvailable, sort, from, size);
         return eventService.getEventsList(
                 text, categories, paid,
-                LocalDateTime.parse(rangeStart, DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                LocalDateTime.parse(rangeEnd, DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                DateTimeFormat.stringToDateTime(rangeStart),
+                DateTimeFormat.stringToDateTime(rangeEnd),
                 onlyAvailable, sort, PageCalc.getPageable(from, size));
     }
 

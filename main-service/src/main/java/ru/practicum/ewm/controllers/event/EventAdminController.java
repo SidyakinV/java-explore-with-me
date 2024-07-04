@@ -6,11 +6,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.UpdateEventAdminRequest;
 import ru.practicum.ewm.services.event.EventService;
+import ru.practicum.ewm.utility.DateTimeFormat;
 import ru.practicum.ewm.utility.PageCalc;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -36,8 +35,8 @@ public class EventAdminController {
                     users, states, categories, rangeStart, rangeEnd, from, size);
         return eventService.getUserEvents(
                 users, states, categories,
-                LocalDateTime.parse(rangeStart, DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                LocalDateTime.parse(rangeEnd, DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                DateTimeFormat.stringToDateTime(rangeStart),
+                DateTimeFormat.stringToDateTime(rangeEnd),
                 PageCalc.getPageable(from, size));
     }
 

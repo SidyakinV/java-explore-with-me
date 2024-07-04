@@ -20,7 +20,7 @@ public class Event {
     private Category category;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "initiator_id")
     private User initiator;
 
     @Column(nullable = false)

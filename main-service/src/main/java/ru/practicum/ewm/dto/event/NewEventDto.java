@@ -1,6 +1,8 @@
 package ru.practicum.ewm.dto.event;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import ru.practicum.ewm.dto.location.Location;
 
 import javax.validation.constraints.NotNull;

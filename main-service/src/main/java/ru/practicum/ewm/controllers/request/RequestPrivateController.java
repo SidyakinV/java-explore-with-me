@@ -10,7 +10,7 @@ import ru.practicum.ewm.services.request.RequestService;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/users/{userid}/requests")
+@RequestMapping(path = "/users/{userId}/requests")
 @RequiredArgsConstructor
 @Slf4j
 public class RequestPrivateController {
@@ -26,7 +26,7 @@ public class RequestPrivateController {
         return requestService.getUserRequests(userId);
     }
 
-    @PostMapping
+    @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
     public ParticipationRequestDto addEventRequest(
             @PathVariable Long userId,

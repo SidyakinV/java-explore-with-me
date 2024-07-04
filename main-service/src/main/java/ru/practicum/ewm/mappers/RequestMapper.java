@@ -2,8 +2,8 @@ package ru.practicum.ewm.mappers;
 
 import ru.practicum.ewm.dto.request.ParticipationRequestDto;
 import ru.practicum.ewm.models.Request;
+import ru.practicum.ewm.utility.DateTimeFormat;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,7 +14,7 @@ public class RequestMapper {
         dto.setId(request.getId());
         dto.setEvent(request.getEvent().getId());
         dto.setRequester(request.getRequester().getId());
-        dto.setCreated(request.getCreated().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        dto.setCreated(DateTimeFormat.dateTimeToString(request.getCreated()));
         dto.setStatus(request.getStatus().toString());
         return dto;
     }
