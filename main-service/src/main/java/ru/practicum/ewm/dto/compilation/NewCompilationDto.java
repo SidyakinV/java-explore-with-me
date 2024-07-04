@@ -1,7 +1,6 @@
 package ru.practicum.ewm.dto.compilation;
 
 import lombok.Data;
-import ru.practicum.ewm.dto.event.EventShortDto;
 
 import javax.validation.constraints.Size;
 import java.util.List;

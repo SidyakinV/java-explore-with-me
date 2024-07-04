@@ -1,8 +1,6 @@
 package ru.practicum.ewm.services.category;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.ewm.dto.category.CategoryDto;
 
 import java.util.List;

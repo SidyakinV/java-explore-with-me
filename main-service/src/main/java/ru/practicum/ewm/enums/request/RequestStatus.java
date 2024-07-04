@@ -1,6 +1,5 @@
 package ru.practicum.ewm.enums.request;
 
-import ru.practicum.ewm.enums.event.EventState;
 import ru.practicum.ewm.exceptions.UnsupportedException;
 
 public enum RequestStatus {

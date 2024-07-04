@@ -4,7 +4,6 @@ import ru.practicum.ewm.dto.request.ParticipationRequestDto;
 import ru.practicum.ewm.models.Request;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
