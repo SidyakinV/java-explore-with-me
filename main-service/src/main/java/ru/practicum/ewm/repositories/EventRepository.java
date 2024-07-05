@@ -2,11 +2,9 @@ package ru.practicum.ewm.repositories;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.ewm.enums.event.EventState;
-import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.User;
 

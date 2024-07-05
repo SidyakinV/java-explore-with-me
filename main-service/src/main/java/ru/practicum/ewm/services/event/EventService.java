@@ -1,7 +1,6 @@
 package ru.practicum.ewm.services.event;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.ewm.dto.event.*;
 import ru.practicum.ewm.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.ewm.dto.request.EventRequestStatusUpdateResult;

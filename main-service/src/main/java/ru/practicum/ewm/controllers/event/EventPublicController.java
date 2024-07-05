@@ -8,7 +8,6 @@ import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.services.event.EventService;
 import ru.practicum.ewm.utility.DateTimeFormat;
-import ru.practicum.ewm.utility.PageCalc;
 
 import java.util.List;
 
