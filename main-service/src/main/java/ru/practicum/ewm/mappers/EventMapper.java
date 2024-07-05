@@ -2,9 +2,12 @@ package ru.practicum.ewm.mappers;
 
 import ru.practicum.ewm.dto.category.CategoryMapper;
 import ru.practicum.ewm.dto.event.*;
+import ru.practicum.ewm.dto.location.Location;
 import ru.practicum.ewm.dto.user.UserMapper;
 import ru.practicum.ewm.models.Event;
-import ru.practicum.ewm.utility.DateTimeFormat;
+
+import static ru.practicum.ewm.utility.DateTimeFormat.*;
+import static ru.practicum.ewm.utility.FillFields.*;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +17,7 @@ public class EventMapper {
         Event event = new Event();
         event.setAnnotation(dto.getAnnotation());
         event.setDescription(dto.getDescription());
-        event.setEventDate(DateTimeFormat.stringToDateTime(dto.getEventDate()));
+        event.setEventDate(stringToDateTime(dto.getEventDate()));
         event.setLocationLat(dto.getLocation().getLat());
         event.setLocationLon(dto.getLocation().getLon());
         event.setPaid(dto.getPaid());
@@ -29,7 +32,7 @@ public class EventMapper {
         Event event = new Event();
         event.setAnnotation(dto.getAnnotation());
         event.setDescription(dto.getDescription());
-        event.setEventDate(DateTimeFormat.stringToDateTime(dto.getEventDate()));
+        event.setEventDate(stringToDateTime(dto.getEventDate()));
         event.setLocationLat(dto.getLocation().getLat());
         event.setLocationLon(dto.getLocation().getLon());
         event.setPaid(dto.getPaid());
@@ -39,27 +42,31 @@ public class EventMapper {
         return event;
     }
 
-    public static Event mapUpdateAdminEventDtoToEvent(UpdateEventAdminRequest dto) {
+    public static Event mapUpdateEventAdminDtoToEvent(UpdateEventAdminRequest dto, Event oldEvent) {
         Event event = new Event();
-        event.setAnnotation(dto.getAnnotation());
-        event.setDescription(dto.getDescription());
-        event.setEventDate(DateTimeFormat.stringToDateTime(dto.getEventDate()));
-        event.setLocationLat(dto.getLocation().getLat());
-        event.setLocationLon(dto.getLocation().getLon());
-        event.setPaid(dto.getPaid());
-        event.setParticipantLimit(dto.getParticipantLimit());
-        event.setRequestModeration(dto.getRequestModeration());
-        event.setTitle(dto.getTitle());
+        event.setAnnotation(ifNull(dto.getAnnotation(), oldEvent.getAnnotation()));
+        event.setDescription(ifNull(dto.getDescription(), oldEvent.getDescription()));
+        event.setEventDate(ifNull(stringToDateTime(dto.getEventDate()), oldEvent.getEventDate()));
+        event.setLocationLat(ifNull(dto.getLocation().getLat(), oldEvent.getLocationLat()));
+        event.setLocationLon(ifNull(dto.getLocation().getLon(), oldEvent.getLocationLon()));
+        event.setPaid(ifNull(dto.getPaid(), oldEvent.getPaid()));
+        event.setParticipantLimit(ifNull(dto.getParticipantLimit(), oldEvent.getParticipantLimit()));
+        event.setRequestModeration(ifNull(dto.getRequestModeration(), oldEvent.getRequestModeration()));
+        event.setTitle(ifNull(dto.getTitle(), oldEvent.getTitle()));
+        event.setCategory(oldEvent.getCategory());
+        event.setState(oldEvent.getState());
         return event;
     }
 
     public static EventFullDto mapEventToEventFullDto(Event event) {
         EventFullDto dto = new EventFullDto();
+        dto.setLocation(new Location());
+
         dto.setAnnotation(event.getAnnotation());
         dto.setCategory(CategoryMapper.mapCategoryToDto(event.getCategory()));
         dto.setConfirmedRequests(event.getConfirmedRequests());
-        dto.setCreatedOn(DateTimeFormat.dateTimeToString(event.getCreated()));
-        dto.setEventDate(DateTimeFormat.dateTimeToString(event.getEventDate()));
+        dto.setCreatedOn(dateTimeToString(event.getCreated()));
+        dto.setEventDate(dateTimeToString(event.getEventDate()));
         dto.setDescription(event.getDescription());
         dto.setId(event.getId());
         dto.setInitiator(UserMapper.mapUserToUserShortDto(event.getInitiator()));
@@ -67,7 +74,7 @@ public class EventMapper {
         dto.getLocation().setLon(event.getLocationLon());
         dto.setPaid(event.getPaid());
         dto.setParticipantLimit(event.getParticipantLimit());
-        dto.setPublishedOn(DateTimeFormat.dateTimeToString(event.getPublished()));
+        dto.setPublishedOn(dateTimeToString(event.getPublished()));
         dto.setRequestModeration(event.getRequestModeration());
         dto.setState(event.getState().toString());
         dto.setTitle(event.getTitle());
@@ -80,7 +87,7 @@ public class EventMapper {
         dto.setAnnotation(event.getAnnotation());
         dto.setCategory(CategoryMapper.mapCategoryToDto(event.getCategory()));
         dto.setConfirmedRequests(event.getConfirmedRequests());
-        dto.setEventDate(DateTimeFormat.dateTimeToString(event.getEventDate()));
+        dto.setEventDate(dateTimeToString(event.getEventDate()));
         dto.setId(event.getId());
         dto.setInitiator(UserMapper.mapUserToUserShortDto(event.getInitiator()));
         dto.setPaid(event.getPaid());

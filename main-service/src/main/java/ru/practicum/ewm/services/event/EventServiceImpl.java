@@ -43,10 +43,15 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto addEvent(Long userId, NewEventDto dto) {
+        User initiator = findUserById(userId);
         Category category = findCategoryById(dto.getCategory());
 
         Event event = EventMapper.mapNewEventDtoToEvent(dto);
         event.setCategory(category);
+        event.setInitiator(initiator);
+        event.setConfirmedRequests(0L);
+        event.setState(EventState.PENDING);
+        event.setViews(0L);
 
         checkEventDate(event.getEventDate(), 2L);
 
@@ -92,26 +97,30 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest dto) {
         Event oldEvent = findEventById(eventId);
-        Event newEvent = EventMapper.mapUpdateAdminEventDtoToEvent(dto);
+        Event newEvent = EventMapper.mapUpdateEventAdminDtoToEvent(dto, oldEvent);
 
-        newEvent.setCategory(findCategoryById(dto.getCategory()));
-        newEvent.setState(oldEvent.getState());
+        checkEventDate(oldEvent.getEventDate(), 1L);
 
-        checkEventDate(newEvent.getEventDate(), 1L);
-
-        EventActionState action = EventActionState.stringToEventActionState(dto.getStateAction());
-        if (action.equals(EventActionState.PUBLISH_EVENT)) {
-            if (oldEvent.getState().equals(EventState.PENDING)) {
-                newEvent.setState(EventState.PUBLISHED);
-            } else {
-                throw new ConflictException(String.format(
-                        "Cannot publish the event because it's not in the right state: %s", oldEvent.getState()));
-            }
+        if (dto.getCategory() != null) {
+            newEvent.setCategory(findCategoryById(dto.getCategory()));
         }
-        if (action.equals(EventActionState.REJECT_EVENT)) {
-            if (!oldEvent.getState().equals(EventState.PUBLISHED)) {
-                throw new ConflictException(String.format(
-                        "Cannot reject the event because it's not in the right state: %s", oldEvent.getState()));
+
+        if (dto.getStateAction() != null) {
+            switch (EventActionState.stringToEventActionState(dto.getStateAction())) {
+                case PUBLISH_EVENT:
+                    if (!oldEvent.getState().equals(EventState.PENDING)) {
+                        throw new ConflictException(String.format(
+                                "Cannot publish the event because it's not in the right state: %s", oldEvent.getState()));
+                    }
+                    newEvent.setState(EventState.PUBLISHED);
+                    break;
+                case REJECT_EVENT:
+                    if (!oldEvent.getState().equals(EventState.PUBLISHED)) {
+                        throw new ConflictException(String.format(
+                                "Cannot publish the event because it's not in the right state: %s", oldEvent.getState()));
+                    }
+                    newEvent.setState(EventState.CANCELED);
+                    break;
             }
         }
 
@@ -176,8 +185,7 @@ public class EventServiceImpl implements EventService {
                             updateRequestStatusByIds(eventId, dto.getRequestIds(), RequestStatus.REJECTED));
                     break;
                 case CONFIRMED:
-                    long confirmed = requestRepository.countByEventAndStatus(event, RequestStatus.CONFIRMED);
-                    int available = (int) (event.getParticipantLimit() - confirmed);
+                    int available = (int) (event.getParticipantLimit() - event.getConfirmedRequests());
                     if (available < dto.getRequestIds().size()) {
                         throw new ConflictException("The request limit has been exceeded");
                     }
@@ -186,6 +194,7 @@ public class EventServiceImpl implements EventService {
                     if (available == dto.getRequestIds().size()) {
                         result.getRejectedRequests().addAll(rejectEventRequests(event));
                     }
+                    event.setConfirmedRequests(event.getConfirmedRequests() + dto.getRequestIds().size());
                     break;
                 default:
                     throw new UnsupportedException("New request status must be 'CONFIRMED' or 'REJECTED'");

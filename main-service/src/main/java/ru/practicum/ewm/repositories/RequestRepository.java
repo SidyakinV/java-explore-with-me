@@ -19,8 +19,6 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     Request findByEventAndRequester(Event event, User requester);
 
-    long countByEventAndStatus(Event event, RequestStatus status);
-
     @Query(value = "UPDATE Request SET status = :status WHERE id IN (:ids)")
     void updateStatusByIds(RequestStatus status, List<Long> ids);
 

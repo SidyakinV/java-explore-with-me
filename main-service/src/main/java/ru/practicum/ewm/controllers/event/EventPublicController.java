@@ -25,11 +25,11 @@ public class EventPublicController {
     public List<EventShortDto> getEventsList(
             @RequestParam(defaultValue = "") String text,
             @RequestParam(required = false) List<Integer> categories,
-            @RequestParam Boolean paid,
+            @RequestParam(required = false) Boolean paid,
             @RequestParam(required = false) String rangeStart,
             @RequestParam(required = false) String rangeEnd,
             @RequestParam(defaultValue = "false") Boolean onlyAvailable,
-            @RequestParam String sort,
+            @RequestParam(required = false) String sort,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
