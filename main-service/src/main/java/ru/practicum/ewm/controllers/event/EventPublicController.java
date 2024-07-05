@@ -24,7 +24,7 @@ public class EventPublicController {
     @ResponseStatus(value = HttpStatus.OK)
     public List<EventShortDto> getEventsList(
             @RequestParam(defaultValue = "") String text,
-            @RequestParam(required = false) List<Integer> categories,
+            @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false) Boolean paid,
             @RequestParam(required = false) String rangeStart,
             @RequestParam(required = false) String rangeEnd,
@@ -38,7 +38,7 @@ public class EventPublicController {
                 "onlyAvailable {}, sort {}, from {}, size {}",
                 text, categories, paid, rangeStart, rangeEnd,
                 onlyAvailable, sort, from, size);
-        return eventService.getEventsList(
+        return eventService.getPublicEvents(
                 text, categories, paid,
                 DateTimeFormat.stringToDateTime(rangeStart),
                 DateTimeFormat.stringToDateTime(rangeEnd),

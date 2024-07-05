@@ -13,8 +13,6 @@ public interface EventService {
 
     EventFullDto addEvent(Long userId, NewEventDto dto);
 
-    List<EventShortDto> getUserEvents(Long userId, Pageable pageable);
-
     EventFullDto getEvent(Long eventId);
 
     EventFullDto getEvent(Long userId, Long eventId);
@@ -28,13 +26,15 @@ public interface EventService {
     EventRequestStatusUpdateResult changeEventRequestsStatus(
             Long userId, Long eventId, EventRequestStatusUpdateRequest dto);
 
-    List<EventShortDto> getEventsList(
-            String text, List<Integer> categories, Boolean paid,
-            LocalDateTime rangeStart, LocalDateTime rangeEnd,
-            Boolean onlyAvailable, String sort, Pageable pageable);
+    List<EventShortDto> getUserEvents(Long userId, Pageable pageable);
 
-    List<EventFullDto> getUserEvents(
-            List<Long> users, List<String> states, List<Long> categories,
+    List<EventFullDto> getAdminEvents(
+            List<Long> userList, List<String> stateList, List<Long> categoryList,
             LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
+
+    List<EventShortDto> getPublicEvents(
+            String searchText, List<Long> categoryList, Boolean paid,
+            LocalDateTime rangeStart, LocalDateTime rangeEnd,
+            Boolean onlyAvailable, String sortBy, Pageable pageable);
 
 }

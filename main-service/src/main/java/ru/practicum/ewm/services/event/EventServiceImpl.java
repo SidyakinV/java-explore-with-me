@@ -3,12 +3,14 @@ package ru.practicum.ewm.services.event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.dto.event.*;
 import ru.practicum.ewm.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.ewm.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.ewm.dto.request.ParticipationRequestDto;
 import ru.practicum.ewm.enums.event.EventActionState;
+import ru.practicum.ewm.enums.event.EventSort;
 import ru.practicum.ewm.enums.event.EventState;
 import ru.practicum.ewm.enums.request.RequestStatus;
 import ru.practicum.ewm.exceptions.ConflictException;
@@ -27,9 +29,12 @@ import ru.practicum.ewm.repositories.RequestRepository;
 import ru.practicum.ewm.repositories.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static org.springframework.data.domain.Sort.sort;
 
 @Service
 @RequiredArgsConstructor
@@ -205,19 +210,61 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getEventsList(
-            String text, List<Integer> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd,
-            Boolean onlyAvailable, String sort, Pageable pageable
+    public List<EventFullDto> getAdminEvents(
+            List<Long> userList, List<String> stateList, List<Long> categoryList,
+            LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable
     ) {
-        return null;
+        List<Long> users = (userList == null || userList.isEmpty()) ? null : userList;
+        List<Long> categories = (categoryList == null || categoryList.isEmpty()) ? null : categoryList;
+
+        List<EventState> states = null;
+        if (stateList != null && !stateList.isEmpty()) {
+            states = stateList.stream()
+                    .map(EventState::stringToEventState)
+                    .collect(Collectors.toList());
+        }
+
+        List<Event> events = eventRepository.getEventsList(
+                null, rangeStart, rangeEnd, null, null,
+                states, users, categories, pageable, Sort.unsorted()).getContent();
+
+        return events.stream()
+                .map(EventMapper::mapEventToEventFullDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<EventFullDto> getUserEvents(
-            List<Long> users, List<String> states, List<Long> categories,
-            LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable
+    public List<EventShortDto> getPublicEvents(
+            String searchText, List<Long> categoryList, Boolean paid,
+            LocalDateTime rangeStart, LocalDateTime rangeEnd,
+            Boolean onlyAvailable, String sortBy, Pageable pageable
     ) {
-        return null;
+        String text = searchText.isBlank() ? null : searchText;
+        List<Long> categories = (categoryList == null || categoryList.isEmpty()) ? null : categoryList;
+
+        List<EventState> states = new ArrayList<>();
+        states.add(EventState.PUBLISHED);
+
+        Sort sort;
+        switch (EventSort.stringToEventSort(sortBy)) {
+            case EVENT_DATE:
+                sort = Sort.by("e.eventDate");
+                break;
+            case VIEWS:
+                sort = Sort.by("e.views").descending();
+                break;
+            default:
+                sort = Sort.unsorted();
+        }
+
+        List<Event> events = eventRepository.getEventsList(
+                text, rangeStart, rangeEnd, paid, onlyAvailable,
+                states, null, categories,
+                pageable, sort).getContent();
+
+        return events.stream()
+                .map(EventMapper::mapEventToEventShortDto)
+                .collect(Collectors.toList());
     }
 
     private Category findCategoryById(Long catId) {

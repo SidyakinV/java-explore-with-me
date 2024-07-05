@@ -33,7 +33,7 @@ public class EventAdminController {
         log.info("GET-request '/admin/events' with parameters: " +
                     "users {}, states {}, categories {}, rangeStart {}, rangeEnd {}, from {}, size {}",
                     users, states, categories, rangeStart, rangeEnd, from, size);
-        return eventService.getUserEvents(
+        return eventService.getAdminEvents(
                 users, states, categories,
                 DateTimeFormat.stringToDateTime(rangeStart),
                 DateTimeFormat.stringToDateTime(rangeEnd),
