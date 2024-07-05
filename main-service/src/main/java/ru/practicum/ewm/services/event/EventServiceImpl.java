@@ -27,6 +27,7 @@ import ru.practicum.ewm.repositories.CategoryRepository;
 import ru.practicum.ewm.repositories.EventRepository;
 import ru.practicum.ewm.repositories.RequestRepository;
 import ru.practicum.ewm.repositories.UserRepository;
+import ru.practicum.ewm.utility.PageCalc;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -106,8 +107,11 @@ public class EventServiceImpl implements EventService {
 
         checkEventDate(oldEvent.getEventDate(), 1L);
 
+        newEvent.setInitiator(oldEvent.getInitiator());
         if (dto.getCategory() != null) {
             newEvent.setCategory(findCategoryById(dto.getCategory()));
+        } else {
+            newEvent.setCategory(oldEvent.getCategory());
         }
 
         if (dto.getStateAction() != null) {
@@ -224,20 +228,26 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toList());
         }
 
+        /*
         List<Event> events = eventRepository.getEventsList(
-                null, rangeStart, rangeEnd, null, null,
-                states, users, categories, pageable, Sort.unsorted()).getContent();
+                null,
+                //rangeStart, rangeEnd, null, null,
+                //states, users, categories,
+                pageable).getContent();
 
         return events.stream()
                 .map(EventMapper::mapEventToEventFullDto)
                 .collect(Collectors.toList());
+
+         */
+        throw new RuntimeException("sdafsdf");
     }
 
     @Override
     public List<EventShortDto> getPublicEvents(
             String searchText, List<Long> categoryList, Boolean paid,
             LocalDateTime rangeStart, LocalDateTime rangeEnd,
-            Boolean onlyAvailable, String sortBy, Pageable pageable
+            Boolean onlyAvailable, String sortBy, Integer from, Integer size
     ) {
         String text = searchText.isBlank() ? null : searchText;
         List<Long> categories = (categoryList == null || categoryList.isEmpty()) ? null : categoryList;
@@ -245,22 +255,26 @@ public class EventServiceImpl implements EventService {
         List<EventState> states = new ArrayList<>();
         states.add(EventState.PUBLISHED);
 
-        Sort sort;
-        switch (EventSort.stringToEventSort(sortBy)) {
-            case EVENT_DATE:
-                sort = Sort.by("e.eventDate");
-                break;
-            case VIEWS:
-                sort = Sort.by("e.views").descending();
-                break;
-            default:
-                sort = Sort.unsorted();
+        Sort sort = Sort.unsorted();
+        if (sortBy != null) {
+            switch (EventSort.stringToEventSort(sortBy)) {
+                case EVENT_DATE:
+                    sort = Sort.by("e.eventDate");
+                    break;
+                case VIEWS:
+                    sort = Sort.by("e.views").descending();
+                    break;
+            }
         }
 
+        Pageable pageable = PageCalc.getPageable(from, size, sort);
+
         List<Event> events = eventRepository.getEventsList(
-                text, rangeStart, rangeEnd, paid, onlyAvailable,
+                text, rangeStart, rangeEnd,
+                paid, onlyAvailable,
                 states, null, categories,
-                pageable, sort).getContent();
+                pageable).getContent();
+
 
         return events.stream()
                 .map(EventMapper::mapEventToEventShortDto)

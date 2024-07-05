@@ -1,6 +1,7 @@
 package ru.practicum.ewm.services.event;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.ewm.dto.event.*;
 import ru.practicum.ewm.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.ewm.dto.request.EventRequestStatusUpdateResult;
@@ -35,6 +36,6 @@ public interface EventService {
     List<EventShortDto> getPublicEvents(
             String searchText, List<Long> categoryList, Boolean paid,
             LocalDateTime rangeStart, LocalDateTime rangeEnd,
-            Boolean onlyAvailable, String sortBy, Pageable pageable);
+            Boolean onlyAvailable, String sortBy, Integer from, Integer size);
 
 }

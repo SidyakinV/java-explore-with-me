@@ -25,18 +25,21 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "  JOIN e.initiator " +
             "WHERE (:text IS NULL " +
             "          OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', :text, '%')) " +
-            "          OR LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%')) ) " +
-            "  AND (:start IS NULL OR e.eventDate >= :start) " +
-            "  AND (:end IS NULL OR e.eventDate <= :end) " +
+            "          OR LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%'))) " +
+            "  AND (CAST(:start AS timestamp) IS NULL OR e.eventDate >= :start) " +
+            "  AND (CAST(:end AS timestamp) IS NULL OR e.eventDate <= :end) " +
             "  AND (:paid IS NULL OR e.paid = :paid) " +
-            "  AND (:onlyAvailable IS NULL OR (:onlyAvailable = true AND confirmedRequests < participantLimit)) " +
+            "  AND (:onlyAvailable IS NULL OR e.confirmedRequests < e.participantLimit) " +
             "  AND (:states IS NULL OR e.state IN (:states)) " +
             "  AND (:users IS NULL OR e.initiator.id IN (:users)) " +
             "  AND (:categories IS NULL OR e.category.id IN (:categories))"
     )
     Slice<Event> getEventsList(
-            String text, LocalDateTime start, LocalDateTime end, Boolean paid, Boolean onlyAvailable,
+            String text,
+            LocalDateTime start, LocalDateTime end,
+            Boolean paid, Boolean onlyAvailable,
             List<EventState> states, List<Long> users, List<Long> categories,
-            Pageable pageable, Sort sort);
+            Pageable pageable);
+
 
 }

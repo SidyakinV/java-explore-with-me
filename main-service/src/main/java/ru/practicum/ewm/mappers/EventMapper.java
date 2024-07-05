@@ -47,14 +47,26 @@ public class EventMapper {
         event.setAnnotation(ifNull(dto.getAnnotation(), oldEvent.getAnnotation()));
         event.setDescription(ifNull(dto.getDescription(), oldEvent.getDescription()));
         event.setEventDate(ifNull(stringToDateTime(dto.getEventDate()), oldEvent.getEventDate()));
-        event.setLocationLat(ifNull(dto.getLocation().getLat(), oldEvent.getLocationLat()));
-        event.setLocationLon(ifNull(dto.getLocation().getLon(), oldEvent.getLocationLon()));
         event.setPaid(ifNull(dto.getPaid(), oldEvent.getPaid()));
         event.setParticipantLimit(ifNull(dto.getParticipantLimit(), oldEvent.getParticipantLimit()));
         event.setRequestModeration(ifNull(dto.getRequestModeration(), oldEvent.getRequestModeration()));
         event.setTitle(ifNull(dto.getTitle(), oldEvent.getTitle()));
+
         event.setCategory(oldEvent.getCategory());
         event.setState(oldEvent.getState());
+        event.setConfirmedRequests(oldEvent.getConfirmedRequests());
+        event.setCreated(oldEvent.getCreated());
+        event.setPublished(oldEvent.getPublished());
+        event.setViews(oldEvent.getViews());
+
+        if (dto.getLocation() == null) {
+            event.setLocationLat(oldEvent.getLocationLat());
+            event.setLocationLon(oldEvent.getLocationLon());
+        } else {
+            event.setLocationLat(ifNull(dto.getLocation().getLat(), oldEvent.getLocationLat()));
+            event.setLocationLon(ifNull(dto.getLocation().getLon(), oldEvent.getLocationLon()));
+        }
+
         return event;
     }
 

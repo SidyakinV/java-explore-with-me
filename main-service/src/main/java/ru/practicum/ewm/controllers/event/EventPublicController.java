@@ -42,7 +42,7 @@ public class EventPublicController {
                 text, categories, paid,
                 DateTimeFormat.stringToDateTime(rangeStart),
                 DateTimeFormat.stringToDateTime(rangeEnd),
-                onlyAvailable, sort, PageCalc.getPageable(from, size));
+                onlyAvailable, sort, from, size);
     }
 
     @GetMapping("/{id}")
