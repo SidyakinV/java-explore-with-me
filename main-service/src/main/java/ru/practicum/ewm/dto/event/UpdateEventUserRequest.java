@@ -3,6 +3,7 @@ package ru.practicum.ewm.dto.event;
 import lombok.Data;
 import ru.practicum.ewm.dto.location.Location;
 
+import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 
 @Data
@@ -22,6 +23,7 @@ public class UpdateEventUserRequest {
 
     private Boolean paid;
 
+    @PositiveOrZero
     private Integer participantLimit;
 
     private Boolean requestModeration;

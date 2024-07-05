@@ -35,8 +35,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.springframework.data.domain.Sort.sort;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -82,7 +80,15 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto getEvent(Long eventId) {
         Event event = findEventById(eventId);
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new NotFoundException("Сообщение не опубликовано");
+        }
         log.info("Получено событие с id={}", event);
+
+        //event.setViews(event.getViews() + 1);
+        //eventRepository.save(event);
+        //log.info("Количество просмотров для события с id={} увеличено: {}", eventId, event);
+
         return EventMapper.mapEventToEventFullDto(event);
     }
 
@@ -228,19 +234,15 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toList());
         }
 
-        /*
         List<Event> events = eventRepository.getEventsList(
                 null,
-                //rangeStart, rangeEnd, null, null,
-                //states, users, categories,
+                rangeStart, rangeEnd, null, null,
+                states, users, categories,
                 pageable).getContent();
 
         return events.stream()
                 .map(EventMapper::mapEventToEventFullDto)
                 .collect(Collectors.toList());
-
-         */
-        throw new RuntimeException("sdafsdf");
     }
 
     @Override
