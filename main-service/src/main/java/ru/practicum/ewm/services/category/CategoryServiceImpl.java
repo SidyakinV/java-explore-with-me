@@ -11,6 +11,7 @@ import ru.practicum.ewm.repositories.CategoryRepository;
 import ru.practicum.ewm.exceptions.NotFoundException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,12 +50,17 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> getAllCategories(Pageable pageable) {
-        return null;
+        List<Category> categories = categoryRepository.findAll();
+        return categories.stream()
+                .map(CategoryMapper::mapCategoryToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public CategoryDto getCategoryById(Long catId) {
-        return null;
+        Category category = categoryRepository.findById(catId).orElseThrow(() ->
+                new NotFoundException("Категория не найдена"));
+        return CategoryMapper.mapCategoryToDto(category);
     }
 
 }

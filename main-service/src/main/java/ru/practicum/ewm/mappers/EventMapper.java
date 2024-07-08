@@ -28,17 +28,32 @@ public class EventMapper {
         return event;
     }
 
-    public static Event mapUpdateUserEventDtoToEvent(UpdateEventUserRequest dto) {
+    public static Event mapUpdateUserEventDtoToEvent(UpdateEventUserRequest dto, Event oldEvent) {
         Event event = new Event();
-        event.setAnnotation(dto.getAnnotation());
-        event.setDescription(dto.getDescription());
-        event.setEventDate(stringToDateTime(dto.getEventDate()));
-        event.setLocationLat(dto.getLocation().getLat());
-        event.setLocationLon(dto.getLocation().getLon());
-        event.setPaid(dto.getPaid());
-        event.setParticipantLimit(dto.getParticipantLimit());
-        event.setRequestModeration(dto.getRequestModeration());
-        event.setTitle(dto.getTitle());
+        event.setAnnotation(ifNull(dto.getAnnotation(), oldEvent.getAnnotation()));
+        event.setDescription(ifNull(dto.getDescription(), oldEvent.getDescription()));
+        event.setEventDate(ifNull(stringToDateTime(dto.getEventDate()), oldEvent.getEventDate()));
+        event.setPaid(ifNull(dto.getPaid(), oldEvent.getPaid()));
+        event.setParticipantLimit(ifNull(dto.getParticipantLimit(), oldEvent.getParticipantLimit()));
+        event.setRequestModeration(ifNull(dto.getRequestModeration(), oldEvent.getRequestModeration()));
+        event.setTitle(ifNull(dto.getTitle(), oldEvent.getTitle()));
+
+        event.setCategory(oldEvent.getCategory());
+        event.setState(oldEvent.getState());
+        event.setConfirmedRequests(oldEvent.getConfirmedRequests());
+        event.setCreated(oldEvent.getCreated());
+        event.setPublished(oldEvent.getPublished());
+        event.setViews(oldEvent.getViews());
+        event.setInitiator(oldEvent.getInitiator());
+
+        if (dto.getLocation() == null) {
+            event.setLocationLat(oldEvent.getLocationLat());
+            event.setLocationLon(oldEvent.getLocationLon());
+        } else {
+            event.setLocationLat(ifNull(dto.getLocation().getLat(), oldEvent.getLocationLat()));
+            event.setLocationLon(ifNull(dto.getLocation().getLon(), oldEvent.getLocationLon()));
+        }
+
         return event;
     }
 
@@ -58,6 +73,7 @@ public class EventMapper {
         event.setCreated(oldEvent.getCreated());
         event.setPublished(oldEvent.getPublished());
         event.setViews(oldEvent.getViews());
+        event.setInitiator(oldEvent.getInitiator());
 
         if (dto.getLocation() == null) {
             event.setLocationLat(oldEvent.getLocationLat());

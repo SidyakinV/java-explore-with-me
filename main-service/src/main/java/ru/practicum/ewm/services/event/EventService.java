@@ -13,7 +13,7 @@ public interface EventService {
 
     EventFullDto addEvent(Long userId, NewEventDto dto);
 
-    EventFullDto getEvent(Long eventId);
+    EventFullDto getEvent(Long eventId, String ip, String path);
 
     EventFullDto getEvent(Long userId, Long eventId);
 
@@ -35,6 +35,7 @@ public interface EventService {
     List<EventShortDto> getPublicEvents(
             String searchText, List<Long> categoryList, Boolean paid,
             LocalDateTime rangeStart, LocalDateTime rangeEnd,
-            Boolean onlyAvailable, String sortBy, Integer from, Integer size);
+            Boolean onlyAvailable, String sortBy, Integer from, Integer size,
+            String ip, String path);
 
 }

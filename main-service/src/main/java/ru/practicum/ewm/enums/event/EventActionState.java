@@ -4,7 +4,7 @@ import ru.practicum.ewm.exceptions.UnsupportedException;
 
 public enum EventActionState {
 
-    PUBLISH_EVENT, REJECT_EVENT;
+    PUBLISH_EVENT, REJECT_EVENT, SEND_TO_REVIEW, CANCEL_REVIEW;
 
     public static EventActionState stringToEventActionState(String value) {
         try {

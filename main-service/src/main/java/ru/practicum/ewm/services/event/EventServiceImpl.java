@@ -19,14 +19,8 @@ import ru.practicum.ewm.exceptions.UnsupportedException;
 import ru.practicum.ewm.exceptions.ValidationException;
 import ru.practicum.ewm.mappers.EventMapper;
 import ru.practicum.ewm.mappers.RequestMapper;
-import ru.practicum.ewm.models.Category;
-import ru.practicum.ewm.models.Event;
-import ru.practicum.ewm.models.Request;
-import ru.practicum.ewm.models.User;
-import ru.practicum.ewm.repositories.CategoryRepository;
-import ru.practicum.ewm.repositories.EventRepository;
-import ru.practicum.ewm.repositories.RequestRepository;
-import ru.practicum.ewm.repositories.UserRepository;
+import ru.practicum.ewm.models.*;
+import ru.practicum.ewm.repositories.*;
 import ru.practicum.ewm.utility.PageCalc;
 
 import java.time.LocalDateTime;
@@ -44,6 +38,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
+    private final LogIpRepository logIpRepository;
 
     @Override
     public EventFullDto addEvent(Long userId, NewEventDto dto) {
@@ -57,6 +52,9 @@ public class EventServiceImpl implements EventService {
         event.setState(EventState.PENDING);
         event.setViews(0L);
 
+        if (event.getEventDate().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Некорректная дата события");
+        }
         checkEventDate(event.getEventDate(), 2L);
 
         Event savedEvent = eventRepository.save(event);
@@ -78,16 +76,17 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getEvent(Long eventId) {
+    public EventFullDto getEvent(Long eventId, String ip, String path) {
         Event event = findEventById(eventId);
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new NotFoundException("Сообщение не опубликовано");
         }
         log.info("Получено событие с id={}", event);
 
-        //event.setViews(event.getViews() + 1);
-        //eventRepository.save(event);
-        //log.info("Количество просмотров для события с id={} увеличено: {}", eventId, event);
+        if (isFirstView(ip, path)) {
+            event.setViews(event.getViews() + 1);
+            eventRepository.save(event);
+        }
 
         return EventMapper.mapEventToEventFullDto(event);
     }
@@ -111,13 +110,15 @@ public class EventServiceImpl implements EventService {
         Event oldEvent = findEventById(eventId);
         Event newEvent = EventMapper.mapUpdateEventAdminDtoToEvent(dto, oldEvent);
 
-        checkEventDate(oldEvent.getEventDate(), 1L);
+        if (newEvent.getEventDate().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Некорректная дата события");
+        }
 
-        newEvent.setInitiator(oldEvent.getInitiator());
+        checkEventDate(oldEvent.getEventDate(), 1L);
+        checkEventDate(newEvent.getEventDate(), 1L);
+
         if (dto.getCategory() != null) {
             newEvent.setCategory(findCategoryById(dto.getCategory()));
-        } else {
-            newEvent.setCategory(oldEvent.getCategory());
         }
 
         if (dto.getStateAction() != null) {
@@ -128,6 +129,7 @@ public class EventServiceImpl implements EventService {
                                 "Cannot publish the event because it's not in the right state: %s", oldEvent.getState()));
                     }
                     newEvent.setState(EventState.PUBLISHED);
+                    newEvent.setPublished(LocalDateTime.now());
                     break;
                 case REJECT_EVENT:
                     if (!oldEvent.getState().equals(EventState.PUBLISHED)) {
@@ -149,22 +151,30 @@ public class EventServiceImpl implements EventService {
     public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest dto) {
         findUserById(userId);
         Event oldEvent = findEventById(eventId);
+        Event newEvent = EventMapper.mapUpdateUserEventDtoToEvent(dto, oldEvent);
 
         if (!Objects.equals(oldEvent.getInitiator().getId(), userId)) {
             throw new ConflictException("Событие оформлено другим пользователем");
         }
+        if (oldEvent.getState().equals(EventState.PUBLISHED)) {
+            throw new ConflictException("Event must not be published");
+        }
+        if (newEvent.getEventDate().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Некорректная дата события");
+        }
 
-        Event newEvent = EventMapper.mapUpdateUserEventDtoToEvent(dto);
-
+        checkEventDate(oldEvent.getEventDate(), 2L);
         checkEventDate(newEvent.getEventDate(), 2L);
-        checkEventState(newEvent.getState());
 
-        newEvent.setCategory(findCategoryById(dto.getCategory()));
-        newEvent.setState(oldEvent.getState());
+        if (dto.getCategory() != null) {
+            newEvent.setCategory(findCategoryById(dto.getCategory()));
+        }
 
-        EventActionState action = EventActionState.stringToEventActionState(dto.getStateAction());
-        if (action == EventActionState.REJECT_EVENT && oldEvent.getState().equals(EventState.PENDING)) {
-            newEvent.setState(EventState.CANCELED);
+        if (dto.getStateAction() != null) {
+            EventActionState action = EventActionState.stringToEventActionState(dto.getStateAction());
+            if (action == EventActionState.CANCEL_REVIEW && oldEvent.getState().equals(EventState.PENDING)) {
+                newEvent.setState(EventState.CANCELED);
+            }
         }
 
         Event savedEvent = eventRepository.save(newEvent);
@@ -249,8 +259,13 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getPublicEvents(
             String searchText, List<Long> categoryList, Boolean paid,
             LocalDateTime rangeStart, LocalDateTime rangeEnd,
-            Boolean onlyAvailable, String sortBy, Integer from, Integer size
+            Boolean onlyAvailable, String sortBy, Integer from, Integer size,
+            String ip, String path
     ) {
+        if (rangeEnd.isBefore(rangeStart)) {
+            throw new ValidationException("Некорректный диапазон дат");
+        }
+
         String text = searchText.isBlank() ? null : searchText;
         List<Long> categories = (categoryList == null || categoryList.isEmpty()) ? null : categoryList;
 
@@ -261,10 +276,10 @@ public class EventServiceImpl implements EventService {
         if (sortBy != null) {
             switch (EventSort.stringToEventSort(sortBy)) {
                 case EVENT_DATE:
-                    sort = Sort.by("e.eventDate");
+                    sort = Sort.by("eventDate");
                     break;
                 case VIEWS:
-                    sort = Sort.by("e.views").descending();
+                    sort = Sort.by("views").descending();
                     break;
             }
         }
@@ -302,12 +317,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private void checkEventState(EventState state) {
-        if (state.equals(EventState.PUBLISHED)) {
-            throw new ConflictException("Event must not be published");
-        }
-    }
-
     private Event findEventById(Long eventId) {
         return eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException(String.format(
@@ -341,6 +350,25 @@ public class EventServiceImpl implements EventService {
         requestRepository.updateStatusByIds(RequestStatus.REJECTED, ids);
 
         return RequestMapper.mapRequestsToDtoList(requests);
+    }
+
+    private boolean isFirstView(String ip, String path) {
+        LogIp log = logIpRepository.findByIpAndPath(ip, path);
+        boolean isFirst = (log == null);
+
+        if (isFirst) {
+            log = new LogIp();
+            log.setIp(ip);
+            log.setPath(path);
+            log.setFirst(LocalDateTime.now());
+            log.setCount(0L);
+        }
+
+        log.setLast(LocalDateTime.now());
+        log.setCount(log.getCount() + 1);
+
+        logIpRepository.save(log);
+        return isFirst;
     }
 
 }

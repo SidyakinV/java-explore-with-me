@@ -9,6 +9,7 @@ import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.services.event.EventService;
 import ru.practicum.ewm.utility.DateTimeFormat;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -30,7 +31,8 @@ public class EventPublicController {
             @RequestParam(defaultValue = "false") Boolean onlyAvailable,
             @RequestParam(required = false) String sort,
             @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest request
     ) {
         log.info("GET-request '/events' with parameters: " +
                 "text {}, categories {}, paid {}, rangeStart {}, rangeEnd {}, " +
@@ -41,16 +43,18 @@ public class EventPublicController {
                 text, categories, paid,
                 DateTimeFormat.stringToDateTime(rangeStart),
                 DateTimeFormat.stringToDateTime(rangeEnd),
-                onlyAvailable, sort, from, size);
+                onlyAvailable, sort, from, size,
+                request.getRemoteAddr(), request.getRequestURI());
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(value = HttpStatus.OK)
     public EventFullDto getEvent(
-            @PathVariable Long id
+            @PathVariable Long id,
+            HttpServletRequest request
     ) {
         log.info("GET-request '/events/{}'", id);
-        return eventService.getEvent(id);
+        return eventService.getEvent(id, request.getRemoteAddr(), request.getRequestURI());
     }
 
 }

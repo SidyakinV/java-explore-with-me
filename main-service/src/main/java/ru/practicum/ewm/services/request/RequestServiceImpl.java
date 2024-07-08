@@ -72,7 +72,11 @@ public class RequestServiceImpl implements RequestService {
         request.setRequester(requester);
         request.setEvent(event);
         request.setCreated(LocalDateTime.now());
-        request.setStatus(event.getRequestModeration() ? RequestStatus.PENDING : RequestStatus.CONFIRMED);
+        request.setStatus(RequestStatus.PENDING);
+
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
+            request.setStatus(RequestStatus.CONFIRMED);
+        }
 
         Request savedRequest = requestRepository.save(request);
         log.info("Добавлен новый запрос на участие: {}", savedRequest);
