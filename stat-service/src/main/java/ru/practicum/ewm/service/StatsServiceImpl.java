@@ -6,6 +6,7 @@ import dto.ViewStats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.model.StatsMapper;
 import ru.practicum.ewm.storage.StatsRepository;
 import ru.practicum.ewm.model.Stats;
@@ -31,6 +32,10 @@ public class StatsServiceImpl implements StatsService {
     @Override
     public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
         List<IVewStats> list;
+
+        if (end.isBefore(start)) {
+            throw new ValidationException("Некорректный период");
+        }
 
         if (uris == null || uris.isEmpty()) {
             if (unique) {
