@@ -21,7 +21,7 @@ public class CompilationPublicController {
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
     public List<CompilationDto> getAllCompilations(
-            @RequestParam Boolean pinned,
+            @RequestParam(defaultValue = "true") Boolean pinned,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {

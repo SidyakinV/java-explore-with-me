@@ -34,9 +34,11 @@ public class CompilationServiceImpl implements CompilationService {
 
         Compilation savedCompilation = compilationRepository.save(compilation);
 
-        dto.getEvents().forEach(eventId -> {
-            compEventRepository.insertCompEvent(savedCompilation.getId(), eventId);
-        });
+        if (dto.getEvents() != null) {
+            dto.getEvents().forEach(eventId -> {
+                compEventRepository.insertCompEvent(savedCompilation.getId(), eventId);
+            });
+        }
 
         log.info("Добавлена подборка {} со списком событий {}", savedCompilation, dto.getEvents());
         return getCompilationById(savedCompilation.getId());

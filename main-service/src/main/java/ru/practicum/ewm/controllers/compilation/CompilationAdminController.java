@@ -41,7 +41,7 @@ public class CompilationAdminController {
     @ResponseStatus(value = HttpStatus.OK)
     public CompilationDto updateCompilation(
             @PathVariable Long compId,
-            @RequestBody UpdateCompilationRequest dto
+            @RequestBody @Valid UpdateCompilationRequest dto
     ) {
         log.info("PATCH-request '/admin/compilations/{}' with parameters: dto {}", compId, dto);
         return compilationService.updateCompilation(compId, dto);

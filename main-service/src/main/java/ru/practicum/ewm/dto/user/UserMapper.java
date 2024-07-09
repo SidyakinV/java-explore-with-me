@@ -19,9 +19,8 @@ public class UserMapper {
         return dto;
     }
 
-    public static User mapDtoToUser(UserDto dto) {
+    public static User mapDtoToUser(NewUserRequest dto) {
         User user = new User();
-        user.setId(dto.getId());
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         return user;

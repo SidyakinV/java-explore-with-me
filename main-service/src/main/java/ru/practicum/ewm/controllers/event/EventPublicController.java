@@ -19,6 +19,7 @@ import java.util.List;
 public class EventPublicController {
 
     private final EventService eventService;
+    //private final StatsClient
 
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
@@ -39,12 +40,14 @@ public class EventPublicController {
                 "onlyAvailable {}, sort {}, from {}, size {}",
                 text, categories, paid, rangeStart, rangeEnd,
                 onlyAvailable, sort, from, size);
-        return eventService.getPublicEvents(
+        List<EventShortDto> events = eventService.getPublicEvents(
                 text, categories, paid,
                 DateTimeFormat.stringToDateTime(rangeStart),
                 DateTimeFormat.stringToDateTime(rangeEnd),
                 onlyAvailable, sort, from, size,
                 request.getRemoteAddr(), request.getRequestURI());
+        sendStats(request.getRequestURI(), request.getRemoteAddr());
+        return events;
     }
 
     @GetMapping("/{id}")
@@ -54,7 +57,13 @@ public class EventPublicController {
             HttpServletRequest request
     ) {
         log.info("GET-request '/events/{}'", id);
-        return eventService.getEvent(id, request.getRemoteAddr(), request.getRequestURI());
+        EventFullDto event = eventService.getEvent(id, request.getRemoteAddr(), request.getRequestURI());
+        sendStats(request.getRequestURI(), request.getRemoteAddr());
+        return event;
+    }
+
+    private void sendStats(String uri, String ip) {
+
     }
 
 }

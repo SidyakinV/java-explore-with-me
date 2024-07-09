@@ -3,6 +3,7 @@ package ru.practicum.ewm.services.request;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.dto.request.ParticipationRequestDto;
 import ru.practicum.ewm.enums.event.EventState;
 import ru.practicum.ewm.enums.request.RequestStatus;
@@ -43,6 +44,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto addEventRequest(Long userId, Long eventId) {
         User requester = findUserById(userId);
         Event event = findEventById(eventId);
@@ -81,6 +83,10 @@ public class RequestServiceImpl implements RequestService {
         Request savedRequest = requestRepository.save(request);
         log.info("Добавлен новый запрос на участие: {}", savedRequest);
 
+        if (request.getStatus().equals(RequestStatus.CONFIRMED)) {
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+        }
+
         return RequestMapper.mapRequestToDto(savedRequest);
     }
 
@@ -89,10 +95,15 @@ public class RequestServiceImpl implements RequestService {
         findUserById(userId);
         Request request = findRequestById(requestId);
 
-        request.setStatus(RequestStatus.REJECTED);
+        if (!request.getStatus().equals(RequestStatus.PENDING)) {
+            throw new ConflictException(String.format(
+                    "Нельзя отменить заявку, ожидается статус PENDING, фактический статус: %s", request.getStatus()));
+        }
+
+        request.setStatus(RequestStatus.CANCELED);
 
         Request savedRequest = requestRepository.save(request);
-        log.info("Заявка на участие отмена пользователем: {}", savedRequest);
+        log.info("Заявка на участие отмена пользователем: userId={}, request={}", userId, savedRequest);
 
         return RequestMapper.mapRequestToDto(savedRequest);
     }

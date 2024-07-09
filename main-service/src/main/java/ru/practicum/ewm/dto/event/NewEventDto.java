@@ -27,14 +27,10 @@ public class NewEventDto {
     @NotNull
     private Location location;
 
-    @NotNull
     private Boolean paid;
 
-    @NotNull
-    @PositiveOrZero
     private Integer participantLimit;
 
-    @NotNull
     private Boolean requestModeration;
 
     @NotNull

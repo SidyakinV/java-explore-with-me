@@ -4,7 +4,7 @@ import ru.practicum.ewm.exceptions.UnsupportedException;
 
 public enum RequestStatus {
 
-    PENDING, CONFIRMED, REJECTED;
+    PENDING, CONFIRMED, REJECTED, CANCELED;
 
     public static RequestStatus stringToRequestStatus(String value) {
         try {

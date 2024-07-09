@@ -3,7 +3,6 @@ package ru.practicum.ewm.repositories;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.ewm.enums.event.EventState;
 import ru.practicum.ewm.models.Event;
@@ -39,5 +38,11 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             Boolean paid, Boolean onlyAvailable,
             List<EventState> states, List<Long> users, List<Long> categories,
             Pageable pageable);
+
+    @Query("SELECT count(*) > 0 " +
+            "FROM Event as e " +
+            "  JOIN e.category " +
+            "WHERE e.category.id = :catId")
+    boolean existsByCatId(Long catId);
 
 }

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.dto.event.*;
 import ru.practicum.ewm.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.ewm.dto.request.EventRequestStatusUpdateResult;
@@ -52,6 +53,9 @@ public class EventServiceImpl implements EventService {
         event.setState(EventState.PENDING);
         event.setViews(0L);
 
+        if (event.getParticipantLimit() < 0) {
+            throw  new ValidationException("Некорректное значение participantLimit");
+        }
         if (event.getEventDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Некорректная дата события");
         }
@@ -132,9 +136,9 @@ public class EventServiceImpl implements EventService {
                     newEvent.setPublished(LocalDateTime.now());
                     break;
                 case REJECT_EVENT:
-                    if (!oldEvent.getState().equals(EventState.PUBLISHED)) {
+                    if (oldEvent.getState().equals(EventState.PUBLISHED)) {
                         throw new ConflictException(String.format(
-                                "Cannot publish the event because it's not in the right state: %s", oldEvent.getState()));
+                                "Cannot reject the event because it's not in the right state: %s", oldEvent.getState()));
                     }
                     newEvent.setState(EventState.CANCELED);
                     break;
@@ -175,6 +179,9 @@ public class EventServiceImpl implements EventService {
             if (action == EventActionState.CANCEL_REVIEW && oldEvent.getState().equals(EventState.PENDING)) {
                 newEvent.setState(EventState.CANCELED);
             }
+            if (action == EventActionState.SEND_TO_REVIEW && oldEvent.getState().equals(EventState.CANCELED)) {
+                newEvent.setState(EventState.PENDING);
+            }
         }
 
         Event savedEvent = eventRepository.save(newEvent);
@@ -195,6 +202,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventRequestStatusUpdateResult changeEventRequestsStatus(
             Long userId, Long eventId, EventRequestStatusUpdateRequest dto
     ) {
@@ -203,27 +211,32 @@ public class EventServiceImpl implements EventService {
 
         EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
 
-        if (event.getParticipantLimit() > 0 && event.getRequestModeration()) {
-            switch (RequestStatus.stringToRequestStatus(dto.getStatus())) {
-                case REJECTED:
-                    result.getRejectedRequests().addAll(
-                            updateRequestStatusByIds(eventId, dto.getRequestIds(), RequestStatus.REJECTED));
-                    break;
-                case CONFIRMED:
-                    int available = (int) (event.getParticipantLimit() - event.getConfirmedRequests());
-                    if (available < dto.getRequestIds().size()) {
-                        throw new ConflictException("The request limit has been exceeded");
-                    }
-                    result.getConfirmedRequests().addAll(
-                            updateRequestStatusByIds(eventId, dto.getRequestIds(), RequestStatus.CONFIRMED));
-                    if (available == dto.getRequestIds().size()) {
-                        result.getRejectedRequests().addAll(rejectEventRequests(event));
-                    }
-                    event.setConfirmedRequests(event.getConfirmedRequests() + dto.getRequestIds().size());
-                    break;
-                default:
-                    throw new UnsupportedException("New request status must be 'CONFIRMED' or 'REJECTED'");
-            }
+        if (dto.getRequestIds().size() == 0) {
+            return result;
+        }
+
+        RequestStatus newStatus = RequestStatus.stringToRequestStatus(dto.getStatus());
+
+        int available = (int) (event.getParticipantLimit() - event.getConfirmedRequests());
+        if (newStatus.equals(RequestStatus.CONFIRMED) && available < dto.getRequestIds().size()) {
+            throw new ConflictException("The request limit has been exceeded");
+        }
+
+        switch (newStatus) {
+            case REJECTED:
+                result.getRejectedRequests().addAll(
+                        updateRequestStatusByIds(eventId, dto.getRequestIds(), RequestStatus.REJECTED));
+                break;
+            case CONFIRMED:
+                result.getConfirmedRequests().addAll(
+                        updateRequestStatusByIds(eventId, dto.getRequestIds(), RequestStatus.CONFIRMED));
+                if (available == dto.getRequestIds().size()) {
+                    result.getRejectedRequests().addAll(rejectEventRequests(event));
+                }
+                event.setConfirmedRequests(event.getConfirmedRequests() + dto.getRequestIds().size());
+                break;
+            default:
+                throw new UnsupportedException("New request status must be 'CONFIRMED' or 'REJECTED'");
         }
 
         return result;
@@ -262,7 +275,7 @@ public class EventServiceImpl implements EventService {
             Boolean onlyAvailable, String sortBy, Integer from, Integer size,
             String ip, String path
     ) {
-        if (rangeEnd.isBefore(rangeStart)) {
+        if (rangeStart != null && rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
             throw new ValidationException("Некорректный диапазон дат");
         }
 
@@ -328,14 +341,18 @@ public class EventServiceImpl implements EventService {
 
         boolean isOk = requests.stream()
                 .filter(request ->
-                        !(request.getStatus().equals(RequestStatus.PENDING) && request.getEvent().getId() == eventId))
+                        !request.getStatus().equals(RequestStatus.PENDING))
                 .findFirst()
                 .isEmpty();
         if (!isOk) {
-            throw new ValidationException("Request must have status PENDING");
+            throw new ConflictException("Request must have status PENDING");
         }
 
         requestRepository.updateStatusByIds(status, ids);
+
+        // Чтобы не делать повторный запрос к серверу на получение списка обновленных заявок, т.к. если SQL-запрос
+        // выполнился без ошибок, то статусы на сервере в любом случае поменялись на заданные
+        requests.forEach(request -> request.setStatus(status));
 
         return RequestMapper.mapRequestsToDtoList(requests);
     }
