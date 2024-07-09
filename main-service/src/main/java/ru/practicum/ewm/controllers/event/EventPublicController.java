@@ -1,15 +1,19 @@
 package ru.practicum.ewm.controllers.event;
 
+import dto.EndpointHit;
+import httpclient.StatsClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.services.event.EventService;
-import ru.practicum.ewm.utility.DateTimeFormat;
+import static ru.practicum.ewm.utility.DateTimeFormat.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -19,7 +23,7 @@ import java.util.List;
 public class EventPublicController {
 
     private final EventService eventService;
-    //private final StatsClient
+    private final StatsClient httpClient;
 
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
@@ -42,8 +46,8 @@ public class EventPublicController {
                 onlyAvailable, sort, from, size);
         List<EventShortDto> events = eventService.getPublicEvents(
                 text, categories, paid,
-                DateTimeFormat.stringToDateTime(rangeStart),
-                DateTimeFormat.stringToDateTime(rangeEnd),
+                stringToDateTime(rangeStart),
+                stringToDateTime(rangeEnd),
                 onlyAvailable, sort, from, size,
                 request.getRemoteAddr(), request.getRequestURI());
         sendStats(request.getRequestURI(), request.getRemoteAddr());
@@ -63,6 +67,17 @@ public class EventPublicController {
     }
 
     private void sendStats(String uri, String ip) {
+        try {
+            EndpointHit dto = new EndpointHit();
+            dto.setApp("ewm-main-service");
+            dto.setIp(ip);
+            dto.setUri(uri);
+            dto.setTimestamp(LocalDateTime.now());
+            ResponseEntity<Object> result = httpClient.addHit(dto);
+            log.info("Информация о запросе сохранена на сервере статистики: " + result);
+        } catch (Exception e) {
+            log.info("Не удалось сохранить информацию на сервере статистики. Ошибка: " + e.getMessage());
+        }
 
     }
 

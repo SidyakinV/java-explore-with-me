@@ -15,5 +15,6 @@ public class EndpointHit {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
+    //private String timestamp;
 
 }
