@@ -14,7 +14,6 @@ import ru.practicum.ewm.exceptions.NotFoundException;
 import ru.practicum.ewm.repositories.EventRepository;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
