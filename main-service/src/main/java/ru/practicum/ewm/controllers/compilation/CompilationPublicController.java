@@ -21,11 +21,11 @@ public class CompilationPublicController {
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
     public List<CompilationDto> getAllCompilations(
-            @RequestParam(defaultValue = "true") Boolean pinned,
+            @RequestParam(required = false) Boolean pinned,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        log.info("GET-request '/compilations'");
+        log.info("GET-request '/compilations' with parameters: pinned={}, from={}, size={}", pinned, from, size);
         return compilationService.getAllCompilations(pinned, PageCalc.getPageable(from, size));
     }
 
