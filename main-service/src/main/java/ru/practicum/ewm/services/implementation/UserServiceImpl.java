@@ -1,4 +1,4 @@
-package ru.practicum.ewm.services.user;
+package ru.practicum.ewm.services.implementation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,9 +7,10 @@ import ru.practicum.ewm.dto.user.NewUserRequest;
 import ru.practicum.ewm.exceptions.ConflictException;
 import ru.practicum.ewm.exceptions.NotFoundException;
 import ru.practicum.ewm.dto.user.UserDto;
-import ru.practicum.ewm.dto.user.UserMapper;
+import ru.practicum.ewm.mappers.UserMapper;
 import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.repositories.UserRepository;
+import ru.practicum.ewm.services.UserService;
 import ru.practicum.ewm.utility.PageCalc;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package ru.practicum.ewm.services.request;
+package ru.practicum.ewm.services.implementation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +16,7 @@ import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.repositories.EventRepository;
 import ru.practicum.ewm.repositories.RequestRepository;
 import ru.practicum.ewm.repositories.UserRepository;
+import ru.practicum.ewm.services.RequestService;
 
 import java.time.LocalDateTime;
 import java.util.List;
