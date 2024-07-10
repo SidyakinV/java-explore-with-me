@@ -1,17 +1,18 @@
-package ru.practicum.ewm.services.category;
+package ru.practicum.ewm.services.implementation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.dto.category.CategoryDto;
-import ru.practicum.ewm.dto.category.CategoryMapper;
+import ru.practicum.ewm.mappers.CategoryMapper;
 import ru.practicum.ewm.exceptions.ConflictException;
 import ru.practicum.ewm.exceptions.ValidationException;
 import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.repositories.CategoryRepository;
 import ru.practicum.ewm.exceptions.NotFoundException;
 import ru.practicum.ewm.repositories.EventRepository;
+import ru.practicum.ewm.services.CategoryService;
 
 import java.util.List;
 import java.util.stream.Collectors;

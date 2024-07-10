@@ -8,7 +8,7 @@ import ru.practicum.ewm.dto.event.*;
 import ru.practicum.ewm.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.ewm.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.ewm.dto.request.ParticipationRequestDto;
-import ru.practicum.ewm.services.event.EventService;
+import ru.practicum.ewm.services.EventService;
 import ru.practicum.ewm.utility.PageCalc;
 
 import javax.validation.Valid;

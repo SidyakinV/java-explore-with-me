@@ -1,4 +1,4 @@
-package ru.practicum.ewm.services.compilation;
+package ru.practicum.ewm.services.implementation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +15,7 @@ import ru.practicum.ewm.models.CompEvent;
 import ru.practicum.ewm.models.Compilation;
 import ru.practicum.ewm.repositories.CompEventRepository;
 import ru.practicum.ewm.repositories.CompilationRepository;
+import ru.practicum.ewm.services.CompilationService;
 
 import java.util.ArrayList;
 import java.util.List;

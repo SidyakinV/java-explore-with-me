@@ -1,4 +1,4 @@
-package ru.practicum.ewm.services.request;
+package ru.practicum.ewm.services;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.dto.request.ParticipationRequestDto;

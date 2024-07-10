@@ -1,4 +1,4 @@
-package ru.practicum.ewm.services.event;
+package ru.practicum.ewm.services;
 
 import org.springframework.data.domain.Pageable;
 import ru.practicum.ewm.dto.event.*;

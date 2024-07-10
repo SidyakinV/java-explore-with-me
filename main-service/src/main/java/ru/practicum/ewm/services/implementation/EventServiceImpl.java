@@ -1,4 +1,4 @@
-package ru.practicum.ewm.services.event;
+package ru.practicum.ewm.services.implementation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +22,7 @@ import ru.practicum.ewm.mappers.EventMapper;
 import ru.practicum.ewm.mappers.RequestMapper;
 import ru.practicum.ewm.models.*;
 import ru.practicum.ewm.repositories.*;
+import ru.practicum.ewm.services.EventService;
 import ru.practicum.ewm.utility.PageCalc;
 
 import java.time.LocalDateTime;

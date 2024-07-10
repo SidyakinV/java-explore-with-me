@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
-import ru.practicum.ewm.services.event.EventService;
+import ru.practicum.ewm.services.EventService;
 import static ru.practicum.ewm.utility.DateTimeFormat.*;
 
 import javax.servlet.http.HttpServletRequest;

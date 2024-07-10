@@ -1,9 +1,7 @@
 package ru.practicum.ewm.mappers;
 
-import ru.practicum.ewm.dto.category.CategoryMapper;
 import ru.practicum.ewm.dto.event.*;
 import ru.practicum.ewm.dto.location.Location;
-import ru.practicum.ewm.dto.user.UserMapper;
 import ru.practicum.ewm.models.Event;
 
 import static ru.practicum.ewm.utility.DateTimeFormat.*;

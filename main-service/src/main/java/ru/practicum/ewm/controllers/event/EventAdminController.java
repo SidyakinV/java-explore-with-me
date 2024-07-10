@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.UpdateEventAdminRequest;
-import ru.practicum.ewm.services.event.EventService;
+import ru.practicum.ewm.services.EventService;
 import ru.practicum.ewm.utility.DateTimeFormat;
 import ru.practicum.ewm.utility.PageCalc;
 
