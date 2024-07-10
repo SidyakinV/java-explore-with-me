@@ -108,6 +108,7 @@ public class EventMapper {
         dto.setState(event.getState().toString());
         dto.setTitle(event.getTitle());
         dto.setViews(event.getViews());
+        dto.setRating(event.getRating());
         return dto;
     }
 
@@ -122,6 +123,7 @@ public class EventMapper {
         dto.setPaid(event.getPaid());
         dto.setTitle(event.getTitle());
         dto.setViews(event.getViews());
+        dto.setRating(event.getRating());
         return dto;
     }
 

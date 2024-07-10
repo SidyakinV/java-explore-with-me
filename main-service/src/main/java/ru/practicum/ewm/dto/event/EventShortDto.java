@@ -25,4 +25,6 @@ public class EventShortDto {
 
     private Long views;
 
+    private Long rating;
+
 }

@@ -294,6 +294,9 @@ public class EventServiceImpl implements EventService {
                 case VIEWS:
                     sort = Sort.by("views").descending();
                     break;
+                case RATING:
+                    sort = Sort.by("rating").descending();
+                    break;
             }
         }
 

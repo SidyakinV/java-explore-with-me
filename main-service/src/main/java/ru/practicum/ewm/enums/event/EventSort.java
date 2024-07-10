@@ -4,7 +4,7 @@ import ru.practicum.ewm.exceptions.UnsupportedException;
 
 public enum EventSort {
 
-    EVENT_DATE, VIEWS;
+    EVENT_DATE, VIEWS, RATING;
 
     public static EventSort stringToEventSort(String value) {
         try {
