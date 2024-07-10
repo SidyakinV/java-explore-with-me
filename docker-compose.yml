@@ -30,6 +30,7 @@ services:
       - stats-server
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm_main
+      - stats-server.url:http://ewm-stat-service:9090
 
   ewm-db:
     image: postgres:13.7-alpine
