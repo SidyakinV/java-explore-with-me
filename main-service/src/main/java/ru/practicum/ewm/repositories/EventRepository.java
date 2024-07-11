@@ -30,7 +30,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "  AND (:onlyAvailable IS NULL OR e.confirmedRequests < e.participantLimit) " +
             "  AND (:states IS NULL OR e.state IN (:states)) " +
             "  AND (:users IS NULL OR e.initiator.id IN (:users)) " +
-            "  AND (:categories IS NULL OR e.category.id IN (:categories))"
+            "  AND (:categories IS NULL OR e.category.id IN (:categories)) "
     )
     Slice<Event> getEventsList(
             String text,
