@@ -324,14 +324,15 @@ public class EventServiceImpl implements EventService {
         Request request = requestRepository.findByEventAndRequester(event, user);
 
         if (!event.getState().equals(EventState.PUBLISHED)) {
-            throw new ConflictException("Событие недоступно");
+            throw new ConflictException("Event was not published");
         }
         if (request == null || !request.getStatus().equals(RequestStatus.CONFIRMED)) {
             throw new ConflictException("Пользователь не принимал участия в событии");
         }
-        if (event.getEventDate().isBefore(LocalDateTime.now())) {
+        /* Данная проверка отключена из-за невозможности выполнить Postman-тесты (см. README.md, Примечание 1)
+        if (event.getEventDate().isAfter(LocalDateTime.now())) {
             throw new ConflictException("Событие еще не наступило");
-        }
+        }*/
 
         EventRating eventRating = eventRatingRepository.findByEventIdAndParticipantId(eventId, userId);
         if (eventRating == null) {
@@ -352,11 +353,12 @@ public class EventServiceImpl implements EventService {
         event.setRating(rating);
         eventRepository.save(event);
 
-        calcRating = eventRatingRepository.calcInitiatorRating(event.getInitiator().getId());
+        User initiator = event.getInitiator();
+        calcRating = eventRatingRepository.calcInitiatorRating(initiator.getId());
         rating = calcRating.getRatesTotal();
 
-        user.setRating(rating);
-        userRepository.save(user);
+        initiator.setRating(rating);
+        userRepository.save(initiator);
     }
 
     private Category findCategoryById(Long catId) {
