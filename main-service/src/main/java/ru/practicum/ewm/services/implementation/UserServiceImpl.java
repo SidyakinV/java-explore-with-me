@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService {
             throw new ConflictException("Пользователь с указанным email уже существует");
         }
         User user = UserMapper.mapDtoToUser(dto);
+        user.setRating(0L);
         User savedUser = userRepository.save(user);
         log.info("Добавлен новый пользователь: {}", savedUser);
         return UserMapper.mapUserToDto(savedUser);

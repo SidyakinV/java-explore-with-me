@@ -41,6 +41,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
     private final LogIpRepository logIpRepository;
+    private final EventRatingRepository eventRatingRepository;
 
     @Override
     public EventFullDto addEvent(Long userId, NewEventDto dto) {
@@ -50,9 +51,7 @@ public class EventServiceImpl implements EventService {
         Event event = EventMapper.mapNewEventDtoToEvent(dto);
         event.setCategory(category);
         event.setInitiator(initiator);
-        event.setConfirmedRequests(0L);
         event.setState(EventState.PENDING);
-        event.setViews(0L);
 
         if (event.getParticipantLimit() < 0) {
             throw  new ValidationException("Некорректное значение participantLimit");
@@ -226,11 +225,11 @@ public class EventServiceImpl implements EventService {
         switch (newStatus) {
             case REJECTED:
                 result.getRejectedRequests().addAll(
-                        updateRequestStatusByIds(eventId, dto.getRequestIds(), RequestStatus.REJECTED));
+                        updateRequestStatusByIds(dto.getRequestIds(), RequestStatus.REJECTED));
                 break;
             case CONFIRMED:
                 result.getConfirmedRequests().addAll(
-                        updateRequestStatusByIds(eventId, dto.getRequestIds(), RequestStatus.CONFIRMED));
+                        updateRequestStatusByIds(dto.getRequestIds(), RequestStatus.CONFIRMED));
                 if (available == dto.getRequestIds().size()) {
                     result.getRejectedRequests().addAll(rejectEventRequests(event));
                 }
@@ -295,6 +294,12 @@ public class EventServiceImpl implements EventService {
                 case VIEWS:
                     sort = Sort.by("views").descending();
                     break;
+                case EVENT_RATING:
+                    sort = Sort.by("rating").descending();
+                    break;
+                case USER_RATING:
+                    sort = Sort.by("initiator.rating").descending();
+                    break;
             }
         }
 
@@ -306,10 +311,54 @@ public class EventServiceImpl implements EventService {
                 states, null, categories,
                 pageable).getContent();
 
-
         return events.stream()
                 .map(EventMapper::mapEventToEventShortDto)
                 .collect(Collectors.toList());
+     }
+
+    @Override
+    @Transactional
+    public void setEventRating(Long eventId, Long userId, Integer rate) {
+        Event event = findEventById(eventId);
+        User user = findUserById(userId);
+        Request request = requestRepository.findByEventAndRequester(event, user);
+
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new ConflictException("Event was not published");
+        }
+        if (request == null || !request.getStatus().equals(RequestStatus.CONFIRMED)) {
+            throw new ConflictException("Пользователь не принимал участия в событии");
+        }
+        /* Данная проверка отключена из-за невозможности выполнить Postman-тесты (см. README.md, Примечание 1)
+        if (event.getEventDate().isAfter(LocalDateTime.now())) {
+            throw new ConflictException("Событие еще не наступило");
+        }*/
+
+        EventRating eventRating = eventRatingRepository.findByEventIdAndParticipantId(eventId, userId);
+        if (eventRating == null) {
+            eventRating = new EventRating();
+            eventRating.setEventId(eventId);
+            eventRating.setParticipantId(userId);
+        }
+        eventRating.setRate(rate);
+        eventRatingRepository.save(eventRating);
+
+        // Сохранение расчетного значения рейтинга несколько нарушает принцип нормализации БД,
+        // зато при минимальных затратах, требующихся на дополнительный объем для хранения этой величины,
+        // позволяет существенно снизить нагрузку на SQL-сервер, т.к. не нужно рассчитывать рейтинг
+        // каждый раз при запросе выборки событий (а-ля кэширование)
+        ICalcRating calcRating = eventRatingRepository.calcEventRating(eventId);
+        long rating = calcRating.getRatesTotal();
+
+        event.setRating(rating);
+        eventRepository.save(event);
+
+        User initiator = event.getInitiator();
+        calcRating = eventRatingRepository.calcInitiatorRating(initiator.getId());
+        rating = calcRating.getRatesTotal();
+
+        initiator.setRating(rating);
+        userRepository.save(initiator);
     }
 
     private Category findCategoryById(Long catId) {
@@ -337,7 +386,7 @@ public class EventServiceImpl implements EventService {
                         "Event with id=%d was not found", eventId)));
     }
 
-    private List<ParticipationRequestDto> updateRequestStatusByIds(long eventId, List<Long> ids, RequestStatus status) {
+    private List<ParticipationRequestDto> updateRequestStatusByIds(List<Long> ids, RequestStatus status) {
         List<Request> requests = requestRepository.findAllById(ids);
 
         boolean isOk = requests.stream()

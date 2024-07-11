@@ -38,4 +38,6 @@ public interface EventService {
             Boolean onlyAvailable, String sortBy, Integer from, Integer size,
             String ip, String path);
 
+    void setEventRating(Long eventId, Long userId, Integer rate);
+
 }

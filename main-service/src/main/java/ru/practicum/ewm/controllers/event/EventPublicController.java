@@ -66,6 +66,26 @@ public class EventPublicController {
         return event;
     }
 
+    @PutMapping("/{eventId}/like/{userId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public void setLikeEvent(
+            @PathVariable Long eventId,
+            @PathVariable Long userId
+    ) {
+        log.info("PUT-request '/events/{}/rating/{}'", eventId, userId);
+        eventService.setEventRating(eventId, userId, 1);
+    }
+
+    @PutMapping("/{eventId}/dislike/{userId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public void setDislikeEvent(
+            @PathVariable Long eventId,
+            @PathVariable Long userId
+    ) {
+        log.info("PUT-request '/events/{}/rating/{}'", eventId, userId);
+        eventService.setEventRating(eventId, userId, -1);
+    }
+
     private void sendStats(String uri, String ip) {
         try {
             EndpointHit dto = new EndpointHit();

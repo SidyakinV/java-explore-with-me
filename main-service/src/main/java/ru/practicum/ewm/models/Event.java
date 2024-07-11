@@ -66,4 +66,6 @@ public class Event {
     @Column(nullable = false)
     private EventState state;
 
+    private Long rating;
+
 }
